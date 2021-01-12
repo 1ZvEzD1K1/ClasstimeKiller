@@ -196,7 +196,7 @@ export default function AddQuizScreen() {
 
               <div className="create-button_container">
                 <div className="create-button button" onClick={saveQuizName}>
-                  <p>Создать</p>
+                  <p>Создать!</p>
                 </div>
               </div>
             </form>
