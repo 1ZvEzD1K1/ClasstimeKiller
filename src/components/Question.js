@@ -20,7 +20,7 @@ const Question = ({
   const handleSelectItem = (e) => {
     dispatch(setSelected({ answ: e.target.value, id }));
   };
-  console.log(`QUESTION ${text}`);
+  console.log(`QUESTION ${imageUrl}`);
   return (
     <>
       <div className="content">
@@ -137,7 +137,7 @@ export default memo(Question);
                 className="Img"
                 width={350}
                 //height={300}
-                src={imageUrl}
+                src={"http://134.249.181.40:7777" + imageUrl.picture}
                 rounded
               />
             </Col>
