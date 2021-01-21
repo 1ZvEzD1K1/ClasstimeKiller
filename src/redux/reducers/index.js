@@ -5,7 +5,7 @@ import answers from "./answers/answer";
 import quiz_list from "./quiz_list/quiz_list";
 import addedQuizes from "./addedQuizes/addedQuizes";
 import user from "./add_user/add_user.js";
-//import User from "../../navigation/Screens.js/dist/User";
+import quiz_rating from "./quiz_rating/quiz_rating";
 import add_test from "./add_test";
 export default combineReducers({
   quizzes,
@@ -15,4 +15,5 @@ export default combineReducers({
   addedQuizes,
   user,
   add_test,
+  quiz_rating,
 });

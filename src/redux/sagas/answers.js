@@ -4,13 +4,13 @@ import { addResults } from "../actions/results";
 import { SEND_ANSWERS } from "../actions/send_answers";
 
 const sendAnswers = ({ obj, id }) =>
-  Axios.post(`http://134.249.181.40:7777/api/${id}/answer/`, obj);
+  Axios.post(`https://questimie.herokuapp.com/api/${id}/answer/`, obj);
 
 //TODO NORMAL USER
 
 function* workerSendData(action) {
   const reqObj = {
-    name: action.payload.user,
+    dude_id: action.payload.user,
     answers: action.payload.obj.map((item) => ({
       question_id: item.question.id,
       choices_id: item.choices
@@ -21,7 +21,6 @@ function* workerSendData(action) {
     })),
   };
   const res = yield call(sendAnswers, { obj: reqObj, id: action.payload.id });
-  yield put(addResults(res));
 }
 
 export function* watchSendData() {

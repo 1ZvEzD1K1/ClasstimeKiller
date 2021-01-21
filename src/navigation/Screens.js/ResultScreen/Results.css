@@ -9,26 +9,13 @@ p {
   cursor: default;
 }
 
-.content_container {
-  margin: 0;
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  height: calc(100vh - 50px);
+.content_container_results {
   padding: 0px 10px 0px 10px;
-  -webkit-box-align: center;
-      -ms-flex-align: center;
-          align-items: center;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
-  overflow: auto;
+  margin-top: 75px;
 }
 
-.content {
-  margin: 0px 0px 20px 0px;
+.content___ {
+  margin: 25px auto;
   max-width: 768px;
 }
 

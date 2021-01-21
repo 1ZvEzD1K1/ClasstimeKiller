@@ -4,7 +4,6 @@ import PropTypes from "prop-types"; // ES6
 import "./styles/style.css";
 
 function ListQuiz({ state, handleSelect, selectedQuestion }) {
-  console.log('ДЕБАГ РАКЕТА ЗАЛЕТАЄ :rocket:', state)
   if (state.length) {
     return (
       <div className="leftbar">
@@ -12,7 +11,12 @@ function ListQuiz({ state, handleSelect, selectedQuestion }) {
           {state &&
             state.map((item, index) => {
               return (
-                <div className="quizlist_item unvoted">
+                <div className={`quizlist_item ${
+                  item.isDone ? "voted" : "unvoted"
+                } ${
+                  selectedQuestion === index ? "current" : ""
+                }`}
+                >
                   <a key={index}>
                     <span>{index + 1}</span>
 
@@ -20,13 +24,11 @@ function ListQuiz({ state, handleSelect, selectedQuestion }) {
                       className="quizlist_item_name"
                       onClick={() => handleSelect(index)}
                     >
-                      {item}
+                      {item.wording}
                     </p>
 
                     <div
-                      className={`icon ${
-                        selectedQuestion === index ? "voted" : ""
-                      }`}
+                      className={'icon'}
                     >
                       <div></div>
                     </div>
@@ -55,27 +57,3 @@ ListQuiz.propTypes = {
 
 export default React.memo(ListQuiz);
 
-{
-  /* <div>
-<ul className="collection">
-  {state.questions &&
-    state.questions.map((item, index) => {
-      return (
-        <li
-          key={index}
-        >
-          <p
-            style={{ cursor: "pointer" }}
-            onClick={() => handleSelect(index)}
-            className={`collection-item ${
-              selectedQuestion === index ? "active" : ""
-            }`}
-          >
-            {index + 1} - {item.question.wording}
-          </p>
-        </li>
-      );
-    })}
-</ul>
-</div> */
-}

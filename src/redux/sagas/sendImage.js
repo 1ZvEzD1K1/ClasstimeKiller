@@ -10,13 +10,12 @@ const sendImages = (images) => {
   console.log(images);
   return axios({
     method: "post",
-    url: "http://134.249.181.40:7777/api/image",
+    url: "https://questimie.herokuapp.com/api/image",
     data: images,
   });
 };
 
 function* workerSendData(action) {
-  console.log(action);
   try {
     const res = yield call(sendImages, action.payload);
     yield put(save_image(res));
@@ -29,6 +28,6 @@ export function* watchSendNewImage() {
   try {
     yield takeEvery(SEND_IMAGE, workerSendData);
   } catch (e) {
-    ///
+    console.log(e);
   }
 }

@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { add_test, reset_add_test } from "../../redux/actions/add_test";
 import QuestionComponent from "../../components/Form/Question";
-import "./styles/create-test.css";
-import { Container } from "react-bootstrap";
+import "./styles/global-master.css";
+import { useHistory } from "react-router-dom";
+import "./stylesforhomescreen/autorization.css";
 
 export default function AddQuizScreen() {
   const dispatch = useDispatch();
   const test_status = useSelector((state) => state.add_test);
+  const history = useHistory();
   const [array, setArray] = useState([
     {
       question_id: 0,
@@ -23,6 +25,50 @@ export default function AddQuizScreen() {
       ],
     },
   ]);
+  console.log("state", array);
+
+  function delC(id, arr, entity, chId) {
+    let choices = arr.map((item) => {
+      if (item.question_id == id) {
+        console.log("item", item.choises);
+        item.choises = delA(chId, item.choises, entity);
+      }
+      return item;
+    });
+    return choices;
+  }
+
+  function deleteAnswer(id, entity, chId) {
+    console.log("state in delAOQ", array);
+    setArray(delC(id, array, entity, chId));
+  }
+
+  function delA(id, arr, entity) {
+    if (arr.length <= 1) {
+      return arr;
+    }
+    let a = arr.filter((item) => {
+      if (item[entity] < id) {
+        return item;
+      } else if (item[entity] == id) {
+        return;
+      } else if (item[entity] > id) {
+        item[entity] -= 1;
+        return item;
+      }
+    });
+    return a;
+  }
+
+  function deleteQuestion(id, entity) {
+    setArray(delA(id, array, entity));
+  }
+
+  const user = useSelector((state) => state.user.loggedIn);
+
+  if (!user) {
+    history.push("/");
+  }
 
   React.useEffect(() => {
     return () => {
@@ -31,31 +77,22 @@ export default function AddQuizScreen() {
   }, [dispatch]);
 
   function saveQuizName() {
-    const inputs = document.querySelectorAll("form input");
+    const inputs = document.querySelectorAll("input, textarea");
     const data = {
       quiz_name: "",
       questions: [],
     };
     Array.from(inputs).forEach((el) => {
-      console.log(el);
       let armel = el.name.split("-");
       switch (armel[0]) {
         case "quiz":
-          data["quiz_name"] = el.value;
+          data[armel[1]] = el.value !== "on" ? el.value : el.checked;
           break;
         case "question":
           if (data.questions[parseInt(armel[2])]) {
-            switch (el.type) {
-              case "checkbox":
-                data.questions[parseInt(armel[2])][armel[1]] = el.checked;
-                break;
-              case "text":
-                data.questions[parseInt(armel[2])][armel[1]] = el.value;
-                break;
-              case "hidden":
-                data.questions[parseInt(armel[2])][armel[1]] = el.value;
-                break;
-            }
+            data.questions[parseInt(armel[2])][armel[1]] = el.checked
+              ? el.type == "checkbox"
+              : el.value;
           } else {
             data.questions[parseInt(armel[2])] = {
               [armel[1]]: el.value !== "on" ? el.value : el.checked,
@@ -73,14 +110,16 @@ export default function AddQuizScreen() {
           } else {
             data.questions[parseInt(armel[2])]["choices"][
               parseInt(armel[3])
-            ] = { [armel[1]]: el.value !== "on" ? el.value : el.checked };
+            ] = {
+              [armel[1]]: el.value !== "on" ? el.value : el.checked,
+            };
           }
           break;
         default:
           break;
       }
     });
-    console.log("ДЕБАГ РАКЕТА ЗАЛЕТАЄ :rocket:", data);
+
     dispatch(add_test(data));
   }
 
@@ -124,285 +163,103 @@ export default function AddQuizScreen() {
   function addNewQuestion() {
     setArray((prevArray) => [...prevArray, nextQuestion(prevArray.length)]);
   }
+
   if (test_status.status === "idle") {
     return (
-      <Container>
-        <div
-          style={{
-            margin: "auto",
-            width: "auto",
-            textAlign: "center",
-            color: "#e57373",
-          }}
-        >
-          <h1>Создать тест</h1>
-        </div>
-        <div className="row">
-          <form className="col s12">
-            <div className="row">
-              <div className="input-field col s6">
-                <input
-                  id="icon_prefix2"
-                  className="materialize-textarea"
-                  placeholder="Enter your Quiz name"
-                  name="quiz-name"
-                />
-              </div>
-            </div>
-          </form>
-        </div>
-        <div
-          style={{
-            margin: "auto",
-            width: "auto",
-            textAlign: "center",
-            color: "#e57373",
-          }}
-        >
-          <h2>Добавить вопрос</h2>
-          <form id="quiz">
-            {array.map((elQ) => {
-              console.log(elQ);
-              return (
-                <QuestionComponent
-                  choices={elQ.choises}
-                  addAnswers={addAnswers}
-                  question_id={elQ.question_id}
-                />
-              );
-            })}
-          </form>
-          <hr />
-          <div>
-            <i
-              onClick={addNewQuestion}
-              style={{ cursor: "pointer" }}
-              className="medium material-icons"
-            >
-              fast_forward
-            </i>
-              <div className="add-question-button_container">
-                <div
-                  onClick={addNewQuestion}
-                  className="add-question-button add-button button"
-                >
-                  <div className="add-img">
-                    <div></div>
-                  </div>
-                  <p>Добавить вопрос</p>
-                </div>
-              </div>
-
-              <div className="create-button_container">
-                <div className="create-button button" onClick={saveQuizName}>
-                  <p>Создать!</p>
-                </div>
-              </div>
-            </form>
-          </div>
-          <button onClick={saveQuizName}>Add</button>
-        </div>
-      </Container>
-    );
-    ///Обработка ошибок 404
-  } else if (test_status.status === 404) {
-    return <p>ERRRROR</p>;
-    ///Екран Успешного добавления теста
-  } else if (test_status.status === 200) {
-    return <p>ADD_TEST_SUCCESS</p>;
-  }
-}
-
-{
-  //  <>
-  //       <div
-  //         style={{
-  //           margin: "auto",
-  //           width: "auto",
-  //           textAlign: "center",
-  //           color: "#e57373",
-  //         }}
-  //       >
-  //         <h1>Создать тест</h1>
-  //       </div>
-  //       <div classNameName="row">
-  //         <form classNameName="col s12" onSubmit={normalno}>
-  //           <div classNameName="row">
-  //             <div classNameName="input-field col s6">
-  //               <input
-  //                 id="icon_prefix2"
-  //                 classNameName="materialize-textarea"
-  //                 placeholder="Enter your Quiz name"
-  //                 name="quiz-name"
-  //               />
-  //             </div>
-  //           </div>
-  //         </form>
-  //       </div>
-  //       <div
-  //         style={{
-  //           margin: "auto",
-  //           width: "auto",
-  //           textAlign: "center",
-  //           color: "#e57373",
-  //         }}
-  //       >
-  //         <h2>Добавить вопрос</h2>
-  //         <form id="quiz">
-  //           {array.map((elQ) => {
-  //             return (
-  //               <div id={`question${elQ.question_id}`}>
-  //                 <input
-  //                   type="text"
-  //                   name={`question-wording-${elQ.question_id}`}
-  //                   placeholder="Название опроса"
-  //                 />
-  //                 <div id="list_answers">
-  //                   {elQ.choises.map((el) => {
-  //                     return (
-  //                       <>
-  //                         <input
-  //                           type="text"
-  //                           name={`choice-text-${elQ.question_id}-${el.choise_id}`}
-  //                           placeholder="Название опроса"
-  //                         />
-  // <label>
-  //   <input
-  //     type="checkbox_"
-  //     name={`choice-is_correct-${elQ.question_id}-${el.choise_id}`}
-  //   />
-  //   <span>this true?</span>
-  // </label>
-  //                       </>
-  //                     );
-  //                   })}
-  //                 </div>
-  //                 <div>
-  //                   <i
-  //                     onClick={() => {
-  //                       addAnswers(elQ.question_id);
-  //                     }}
-  //                     style={{ cursor: "pointer" }}
-  //                     classNameName="medium material-icons"
-  //                   >
-  //                     add_circle_outline
-  //                   </i>
-  //                 </div>
-  //               </div>
-  //             );
-  //           })}
-  //         </form>
-  //         <hr />
-  //         <div>
-  //           <i
-  //             onClick={addNewQuestion}
-  //             style={{ cursor: "pointer" }}
-  //             classNameName="medium material-icons"
-  //           >
-  //             fast_forward
-  //           </i>
-  //         </div>
-  //         <button
-  //           classNameName="btn waves-effect waves-light"
-  //           type="submit"
-  //           onClick={saveQuizName}
-  //         >
-  //           Создать тест
-  //           <i classNameName="material-icons right">send</i>
-  //         </button>
-  //       </div>
-  //     </>
-}
-
-{
-  /* <div className="content_container">
-        <div className="content">
+      <div className="content_container">
+        <div className="content__">
           <div className="title_container">
             <p>Создать тест</p>
           </div>
           <div className="test-name_container">
             <input
               type="text"
+              name="quiz-quiz_name"
               className="text-input"
-              name="quiz-name"
               placeholder="Название теста"
             />
           </div>
-          <div className="create-test_form_container">
-            <form className="create-test_form">
-              <div className="question_container">
-                {array.map((elQ) => {
-                  return (
-                    <>
-                      <div className="question-title_container">
-                        <p>Вопрос {elQ.question_id+1}</p>
-                      </div>
-                      <div className="question-name_container">
-                        <input
-                          type="text"
-                          className="text-input"
-                          placeholder="Название вопроса"
-                          name={`question-wording-${elQ.question_id}`}
-                        />
-                      </div>
-                      <div className="answers_container">
-                        {elQ.choises.map((el) => {
-                          return (
-                            <div className="answer_container">
-                              <div className="checkbox_">
-                                <input
-                                  type="checkbox"
-                                  name={`choice-is_correct-${elQ.question_id}-${el.choise_id}`}
-                                  className="inp"
-                                />
-                                <label></label>
-                              </div>
-                              <input
-                                type="text"
-                                className="text-input"
-                                placeholder={`Ответ ${el.choise_id}`}
-                                name={`choice-text-${elQ.question_id}-${el.choise_id}`}
-                              />
-                            </div>
-                          );
-                        })}
-                        <div className="add-answer-button_container">
-                          <div
-                            onClick={() => {
-                              addAnswers(elQ.question_id);
-                            }}
-                            className="add-answer-button add-button button"
-                          >
-                            <div className="add-img">
-                              <div></div>
-                            </div>
-                            <p>Добавить вопрос</p>
-                          </div>
-                        </div>
-                      </div>
-                    </>
-                  );
-                })}
+          <div class="is-private_container">
+            <div class="checkbox">
+              <input
+                type="checkbox"
+                id="is_public"
+                className="inp"
+                name="quiz-is_public"
+              />
+              
+              <label for="is_public"></label>
+            </div>
+            <p>Сделать открытым</p>
+          </div>
+          <form name="quiz" className="questions_global_container">
+            {array.map((elQ) => {
+              return (
+                <QuestionComponent
+                  setImage={setArray}
+                  choices={elQ.choises}
+                  addAnswers={addAnswers}
+                  question_id={elQ.question_id}
+                  deleteQuestion={deleteQuestion}
+                  deleteAnswer={deleteAnswer}
+                />
+              );
+            })}
+          </form>
+          <div className="add-question-button_container">
+            <div
+              onClick={addNewQuestion}
+              className="add-question-button add-button button"
+            >
+              <div className="add-img">
+                <div></div>
               </div>
-              <div className="add-question-button_container">
-                <div
-                  onClick={addNewQuestion}
-                  className="add-question-button add-button button"
-                >
-                  <div className="add-img">
-                    <div></div>
-                  </div>
-                  <p>Добавить вопрос</p>
-                </div>
-              </div>
+              <p>Добавить вопрос</p>
+            </div>
+          </div>
 
-              <div className="create-button_container">
-                <div className="create-button button" onClick={saveQuizName}>
-                  <p>Создать</p>
-                </div>
-              </div>
-            </form>
+          <div className="create-button_container">
+            <div onClick={saveQuizName} className="create-button button">
+              <p>Создать</p>
+            </div>
           </div>
         </div>
-      </div> */
+      </div>
+    );
+    ///Обработка ошибок 404
+  } else if (test_status.status === 404) {
+    return <p>ERRRROR</p>;
+    ///Екран Успешного добавления теста
+  } else if (test_status.status === 200) {
+    function copy() {
+      var msg = test_status.action.quiz_id;
+      var temp = document.createElement("textarea");
+      var tempMsg = document.createTextNode(msg);
+      temp.appendChild(tempMsg);
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand("copy");
+      document.body.removeChild(temp);
+    }
+    return (
+      <div id="quiz_id" className="content__auth">
+        <div className="autorization_container">
+          <div className="title_container">
+            <p className="title">
+              Ід вашего теста: <br />
+              <strong>{test_status.action.quiz_id}</strong>
+            </p>
+          </div>
+          <div className="button_container">
+            <input
+              onClick={copy}
+              type="button"
+              className="button_vote button"
+              value="Копировать"
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
 }

@@ -1,8 +1,7 @@
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import PropTypes from "prop-types"; // ES6
 import { useDispatch } from "react-redux";
 import { setDone, setSelected } from "../redux/actions/show_quizzes";
-//import ModalComponent from "./Modal";
 import "./styles/style.css";
 
 const Question = ({
@@ -17,13 +16,14 @@ const Question = ({
 }) => {
   const dispatch = useDispatch();
 
+  const [content, setContent] = useState('')
+
   const handleSelectItem = (e) => {
     dispatch(setSelected({ answ: e.target.value, id }));
   };
-  console.log(`QUESTION ${imageUrl}`);
   return (
     <>
-      <div className="content">
+      <div className={`content ${content}`}>
         <div className="quiz_body">
           <div className="title_container">
             <p>{`Вопрос `}</p>
@@ -31,16 +31,18 @@ const Question = ({
           <div className="quizname">
             <p>{wording}</p>
           </div>
-          <div className="image_container">
-            {imageUrl && <img width={550} src={imageUrl} />}
-          </div>
+            {imageUrl && 
+            <div className="image_container">
+            <img width={550} src={imageUrl.picture} />
+            </div>
+            }
           <div className="description_container">
             <p>{text}</p>
           </div>
           <div className="checkbox_container">
             {answers.map((item) => {
               return (
-                <div className="checkbox" key={item.id}>
+                <div className="checkbox">
                   <input
                     disabled={isDone}
                     onChange={handleSelectItem}
@@ -49,8 +51,7 @@ const Question = ({
                     id={item.id}
                     type="checkbox"
                   />
-
-                  <label>
+                  <label htmlFor={item.id}>                
                     <p>{item.text}</p>
                   </label>
                 </div>
@@ -64,6 +65,7 @@ const Question = ({
               value="Ответить"
               disabled={isDone}
               onClick={() => {
+                console.log('Xyi')
                 dispatch(setDone(id));
               }}
             />
@@ -82,11 +84,10 @@ const Question = ({
               .getElementsByClassName("header__burger")[0]
               .classList.remove("active");
             document
-              .getElementsByClassName("header__menu__")[0]
+              .getElementsByClassName("header__menu")[0]
               .classList.remove("active");
-            document
-              .getElementsByClassName("overlay")[0]
-              .classList.remove("overlay_active");
+            setContent(content == "" ? "content_inactive" : "")
+
           }}
         >
           <p>Список</p>
@@ -95,20 +96,6 @@ const Question = ({
           </div>
         </a>
       </div>
-      <div
-        className={`overlay ${overlay}`}
-        onClick={(e) => {
-          document
-            .getElementsByClassName("header__burger")[0]
-            .classList.remove("active");
-          document
-            .getElementsByClassName("header__menu__")[0]
-            .classList.remove("active");
-          document
-            .getElementsByClassName("overlay")[0]
-            .classList.remove("overlay_active");
-        }}
-      ></div>
     </>
   );
 };
@@ -120,63 +107,3 @@ Question.propTypes = {
   answers: PropTypes.array,
 };
 export default memo(Question);
-
-{
-  /* <Container>
-      <Alert variant="light">
-        <Row>
-          <Col>
-            <Alert.Heading>{wording}</Alert.Heading>
-            {multiple && (
-              <Alert variant="info">Можете выбрать несколько ваиантов!</Alert>
-            )}
-          </Col>
-          {imageUrl && (
-            <Col>
-              <Image
-                className="Img"
-                width={350}
-                //height={300}
-                src={"http://134.249.181.40:7777" + imageUrl.picture}
-                rounded
-              />
-            </Col>
-          )}
-        </Row>
-        <hr />
-        <p className="qtext">{text}</p>
-      </Alert>
-      <List>
-        {answers.map((item) => {
-          return (
-            <ListItem key={item.id}>
-              <p>
-                <label>
-                  <input
-                    disabled={isDone}
-                    onChange={handleSelectItem}
-                    checked={item.isSelected}
-                    value={item.id}
-                    id={item.id}
-                    type="checkbox"
-                  />
-                  <span>{item.text}</span>
-                </label>
-              </p>
-            </ListItem>
-          );
-        })}
-      </List>
-      <Button
-        disabled={isDone}
-        variant="primary"
-        size="lg"
-        block
-        onClick={() => {
-          dispatch(setDone(id));
-        }}
-      >
-        Ответить
-      </Button>
-    </Container> */
-}
